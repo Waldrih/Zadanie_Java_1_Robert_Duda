@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import pl.wszib.edu.duda.database.IUserRepository;
 import pl.wszib.edu.duda.model.User;
 
-@Component //rejestracja klasy jako bean Springa
+@Component
 @RequiredArgsConstructor
 public class Authenticator implements IAuthenticator{
     private final IUserRepository userRepository;

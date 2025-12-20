@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
-@Configuration //oznaczenie jako klasa konfiguracyjna Springa
+@Configuration
 @ComponentScan({
         "pl.wszib.edu.duda.authentication",
         "pl.wszib.edu.duda.database",

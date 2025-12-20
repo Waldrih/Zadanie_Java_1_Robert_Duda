@@ -5,7 +5,6 @@ import java.util.List;
 
 public interface IBookRepository {
     void addBook(Book book);
-    void removeBook(String isbn);
     void removeBook(Book book);
     void updateBook(Book book);
 

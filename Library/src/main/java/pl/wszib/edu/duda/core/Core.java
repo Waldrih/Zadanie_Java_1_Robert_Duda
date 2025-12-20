@@ -26,11 +26,11 @@ public class Core implements ICore {
         );
 
         if (!isAuthenticated) {
-            System.out.println("❌ Login failed.");
+            System.out.println("Login failed.");
             return;
         }
 
-        System.out.println("✅ Login successful!");
+        System.out.println("Login successful!");
         boolean isAdmin = user.getLogin().equalsIgnoreCase("admin");
 
         while (true) {
@@ -49,10 +49,9 @@ public class Core implements ICore {
 
                 case "2": // Rent book
                     try {
-                        String title = gui.readBookTitle();
-                        List<Book> matchingBooks = bookRepository.findByTitle(title);
+                        List<Book> matchingBooks = searchBooksByTitleOrAuthor();
                         if (matchingBooks.isEmpty()) {
-                            System.out.println("⚠️ No book found with this title.");
+                            System.out.println("No matching book found.");
                             break;
                         }
                         Book bookToRent = matchingBooks.get(0);
@@ -65,10 +64,9 @@ public class Core implements ICore {
 
                 case "3": // Return book
                     try {
-                        String title = gui.readBookTitle();
-                        List<Book> matchingBooks = bookRepository.findByTitle(title);
+                        List<Book> matchingBooks = searchBooksByTitleOrAuthor();
                         if (matchingBooks.isEmpty()) {
-                            System.out.println("⚠️ No book found with this title.");
+                            System.out.println("No matching book found.");
                             break;
                         }
                         Book bookToReturn = matchingBooks.get(0);
@@ -79,24 +77,84 @@ public class Core implements ICore {
                     }
                     break;
 
-                case "4": // Edit book (admin only)
+                case "4": // Edit book (admin)
                     if (!isAdmin) {
                         gui.showWrongOptionMessage();
                         break;
                     }
-                    Book updatedBook = gui.readBookToEdit();
-                    bookRepository.updateBook(updatedBook);
-                    System.out.println("✅ Book updated.");
+
+                    try {
+                        List<Book> matchingBooks = searchBooksByTitleOrAuthor();
+                        if (matchingBooks.isEmpty()) {
+                            System.out.println("No book found to edit.");
+                            break;
+                        }
+
+                        Book oldBook = matchingBooks.get(0);
+                        Book newBook = gui.readBookToEdit();
+                        bookRepository.removeBook(oldBook);
+                        bookRepository.addBook(newBook);
+
+                        System.out.println("Book updated.");
+                    } catch (Exception e) {
+                        System.out.println("Error updating book.");
+                    }
+                    break;
+
+                case "5": // Add book (admin)
+                    if (!isAdmin) {
+                        gui.showWrongOptionMessage();
+                        break;
+                    }
+
+                    Book newBook = gui.readNewBook();
+                    bookRepository.addBook(newBook);
+                    System.out.println("Book added.");
+                    break;
+
+                case "6": // Remove book (admin)
+                    if (!isAdmin) {
+                        gui.showWrongOptionMessage();
+                        break;
+                    }
+
+                    try {
+                        List<Book> matchingBooks = searchBooksByTitleOrAuthor();
+                        if (matchingBooks.isEmpty()) {
+                            System.out.println("No book found to remove.");
+                            break;
+                        }
+
+                        Book bookToRemove = matchingBooks.get(0);
+                        bookRepository.removeBook(bookToRemove);
+                        System.out.println("Book removed.");
+                    } catch (Exception e) {
+                        System.out.println("Error removing book.");
+                    }
                     break;
 
                 case "0": // Exit
-                    System.out.println("👋 Exiting program...");
+                    System.out.println("Exiting program...");
                     return;
 
                 default:
                     gui.showWrongOptionMessage();
                     break;
             }
+        }
+    }
+
+    private List<Book> searchBooksByTitleOrAuthor() {
+        String mode = gui.askSearchMode();
+        if (mode.equals("1")) {
+            String title = gui.readBookTitle();
+            return bookRepository.findByTitle(title);
+        } else if (mode.equals("2")) {
+            String author = gui.readBookAuthor();
+            return bookRepository.findByAuthor(author);
+        } else {
+            gui.showWrongOptionMessage();
+            return List.of();
         }
     }
 }
